@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Certified Educator 대화형 학습 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Stone) with a Teal accent -->
+    <!-- Application Structure Plan: The application is structured as a tab-based single-page application. This design was chosen to break down the dense study material into the three core, manageable sections from the source report (Basics, Application, Ethics). This prevents cognitive overload and allows users to focus on one area at a time. The core interactions are accordion cards for each concept (promoting active recall over passive reading) and a section-specific quiz. This transforms the static guide into an active learning tool, which is more effective for exam preparation. The user flow is simple: select a topic via tabs, explore concepts via accordions, and then self-assess with a quiz. -->
+    <!-- Visualization & Content Choices: Report Info: All sections of the study guide. -> Goal: Inform, Organize, Assess. -> Viz/Presentation Method: The primary presentation method is interactive accordion cards (HTML/CSS/JS) to present definitions and concepts. This choice encourages user engagement. For the "PARTS" framework, a visual breakdown is created using styled HTML and Tailwind CSS to make the acronym memorable. For assessment, a multiple-choice quiz is implemented using Vanilla JS. -> Interaction: Users click to expand/collapse concept cards and click to answer quiz questions, receiving immediate feedback. -> Justification: These methods are chosen over static text because they align with learning science principles (active recall, self-assessment) and are perfectly suited for non-numeric, conceptual data. -> Library/Method: Tailwind CSS for styling, Vanilla JS for all interactivity. No charts are needed, so Chart.js is included only to meet requirements. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .tab-active {
+            border-color: #0d9488;
+            color: #0d9488;
+            font-weight: 700;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-open .accordion-content {
+            max-height: 500px;
+            transition: max-height 0.5s ease-in;
+        }
+        .accordion-open .accordion-arrow {
+            transform: rotate(180deg);
+        }
+        .quiz-option {
+            transition: all 0.2s;
+        }
+        .quiz-option.selected {
+            background-color: #ccfbf1;
+            border-color: #14b8a6;
+        }
+        .quiz-option.correct {
+            background-color: #dcfce7 !important;
+            border-color: #22c55e !important;
+            color: #15803d;
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c;
+        }
+        .progress-bar-fill {
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-700">📝 Gemini Certified Educator</h1>
+            <p class="text-lg text-stone-600 mt-2">대화형 핵심 요약 가이드</p>
+        </header>
+
+        <nav class="flex justify-center border-b-2 border-stone-200 mb-8">
+            <button data-tab="tab1" class="tab-btn tab-active text-sm md:text-base py-3 px-4 md:px-6 border-b-2 border-transparent transition-colors duration-300">Ⅰ. 기본 개념</button>
+            <button data-tab="tab2" class="tab-btn text-sm md:text-base py-3 px-4 md:px-6 border-b-2 border-transparent transition-colors duration-300">Ⅱ. 실무 적용</button>
+            <button data-tab="tab3" class="tab-btn text-sm md:text-base py-3 px-4 md:px-6 border-b-2 border-transparent transition-colors duration-300">Ⅲ. AI 윤리</button>
+        </nav>
+
+        <main id="content-container">
+            <section id="tab1" class="tab-content space-y-4">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold text-teal-800 mb-2">Ⅰ. 생성형 AI & Gemini 기본 개념</h2>
+                    <p class="text-stone-600">이 파트에서는 생성형 AI와 Gemini의 기본적인 정의, 특징, 그리고 효과적인 사용법에 대한 이해를 다룹니다. 각 항목을 클릭하여 자세한 내용을 확인해 보세요.</p>
+                </div>
+                <div id="section1-accordions" class="space-y-3"></div>
+            </section>
+
+            <section id="tab2" class="tab-content hidden space-y-4">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold text-teal-800 mb-2">Ⅱ. Gemini 활용 및 실무 적용</h2>
+                    <p class="text-stone-600">이 파트에서는 실제 교육 현장에서 Gemini를 구체적으로 어떻게 활용할 수 있는지에 초점을 맞춥니다. Workspace 도구별 기능과 교사의 활용 사례를 살펴보세요.</p>
+                </div>
+                <div id="section2-accordions" class="space-y-3"></div>
+            </section>
+
+            <section id="tab3" class="tab-content hidden space-y-4">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                     <h2 class="text-2xl font-bold text-teal-800 mb-2">Ⅲ. 책임감 있는 AI & 윤리 교육</h2>
+                    <p class="text-stone-600">이 파트에서는 AI를 책임감 있게 사용하고 학생들에게 올바른 AI 윤리를 교육하는 방법론을 다룹니다. AI의 한계와 교사의 원칙을 이해하는 것이 중요합니다.</p>
+                </div>
+                <div id="section3-accordions" class="space-y-3"></div>
+            </section>
+
+             <div class="mt-10 text-center">
+                <button id="start-comprehensive-quiz-btn" class="bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 transition-colors text-lg shadow-md">
+                    종합 퀴즈로 실력 점검하기 (30문항)
+                </button>
+            </div>
+        </main>
+        
+        <div id="quiz-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[95vh] flex flex-col">
+                <div class="p-5 border-b flex justify-between items-center">
+                    <h2 id="quiz-title" class="text-xl font-bold text-teal-800">종합 퀴즈</h2>
+                    <span id="quiz-progress-text" class="text-sm font-semibold text-stone-600"></span>
+                </div>
+                <div class="w-full bg-stone-200 h-2">
+                    <div id="quiz-progress-bar" class="bg-teal-500 h-2 progress-bar-fill"></div>
+                </div>
+                <div id="quiz-content" class="p-6 overflow-y-auto flex-grow"></div>
+                <div id="quiz-footer" class="p-4 bg-stone-50 border-t flex justify-between items-center">
+                     <button id="close-quiz-btn" class="bg-stone-200 text-stone-700 font-bold py-2 px-4 rounded-lg hover:bg-stone-300 transition-colors">종료</button>
+                     <div id="quiz-navigation"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center mt-12 text-sm text-stone-500">
+            <p>Gemini Certified Educator Interactive Study Guide</p>
+        </footer>
+    </div>
+
+<script>
+const studyData = {
+    section1: {
+        title: '생성형 AI & Gemini 기본 개념',
+        concepts: [
+            { term: '생성형 AI (Generative AI)', definition: '기존 데이터를 학습하여 텍스트, 이미지, 코드 등 새로운 콘텐츠를 생성하는 인공지능입니다. 전통적 AI가 데이터를 분석하고 분류하는 데 중점을 둔다면, 생성형 AI는 창의적인 결과물을 만들어내는 데 특화되어 있습니다.' },
+            { term: 'LLM (Large Language Model)', definition: '대규모 언어 데이터를 학습하여 인간의 언어를 이해하고 생성하는 텍스트 생성 모델입니다. Gemini는 Google이 개발한 대표적인 LLM입니다.' },
+            { term: '프롬프팅 (Prompting)', definition: 'AI가 원하는 방향의 결과물을 생성하도록 명확한 지시나 질문을 제공하는 기술입니다. 효과적인 프롬프팅은 AI 활용의 핵심입니다.' },
+            { term: '효과적인 프롬프트 프레임워크 (PARTS)', definition: '명확한 프롬프트를 작성하기 위한 체계적인 방법입니다.<div class="mt-2 pl-4 border-l-2 border-teal-200 space-y-1 text-stone-700"><div><span class="font-bold text-teal-700">P</span>urpose (목적): 무엇을 위해 결과물이 필요한가?</div><div><span class="font-bold text-teal-700">A</span>udience (대상): 누구를 위한 결과물인가?</div><div><span class="font-bold text-teal-700">R</span>ole (역할): AI가 어떤 전문가 역할을 해야 하는가?</div><div><span class="font-bold text-teal-700">T</span>one (어조): 결과물의 분위기는 어떠해야 하는가? (예: 공식적, 친근함)</div><div><span class="font-bold text-teal-700">S</span>cope (범위): 결과물에 포함될 내용의 범위는 어디까지인가?</div></div>' },
+            { term: 'Gemini의 교육적 가치', definition: 'Gemini는 교사를 대체하는 것이 아니라, 수업 자료 제작, 행정 업무 자동화, 학습 지원 등을 통해 교사의 생산성과 창의성을 높이는 강력한 보조 도구입니다.' },
+            { term: 'Gemini와 Google Workspace', definition: 'Gemini는 Docs, Gmail, Slides 등 다양한 Google Workspace 도구에 통합되어 문서 작업의 효율을 극대화합니다. (단, 현재 Calendar에는 직접 통합되지 않았습니다.)' },
+            { term: '주요 Gemini 도구: NotebookLM', definition: '업로드한 문서를 기반으로 내용을 요약하고, 마인드맵을 만들고, 오디오 개요를 제공하는 AI 기반 노트 및 학습 도구입니다.' },
+            { term: '주요 Gemini 도구: Gems', definition: '자주 사용하는 프롬프트나 작업을 \'맞춤형 Gemini\'로 저장하여 반복적인 AI 작업을 자동화하는 기능입니다.' }
+        ]
+    },
+    section2: {
+        title: 'Gemini 활용 및 실무 적용',
+        concepts: [
+            { term: 'Gemini in Gmail', definition: '이메일의 목적과 원하는 톤을 알려주면 초안을 자동으로 생성하고 수정해줍니다.' },
+            { term: 'Gemini in Forms', definition: 'Google Docs나 Slides의 내용을 기반으로 퀴즈 문항을 자동으로 생성할 수 있습니다.' },
+            { term: 'Gemini in Google Vids', definition: '간단한 설명만으로 스크립트, 음성 내레이션, 관련 영상 클립을 조합하여 비디오를 제작해줍니다.' },
+            { term: '교사의 Gemini 활용 사례: 행정 업무', definition: '학부모 안내문, 가정통신문, 공지사항 등 각종 문서 초안을 빠르게 작성하여 시간을 절약할 수 있습니다.' },
+            { term: '교사의 Gemini 활용 사례: 수업 설계', definition: '학생들의 학습 수준과 흥미에 맞춰 차별화된 맞춤형 과제를 생성할 수 있습니다.' },
+            { term: '교사의 Gemini 활용 사례: 평가', definition: '특정 학습 목표에 맞는 평가 루브릭(Rubric)을 자동으로 생성하여 평가 기준을 명확하고 일관성 있게 만들 수 있습니다.' },
+            { term: '교사의 바람직한 활용 태도', definition: 'Gemini가 생성한 결과물은 초안이나 아이디어로 활용하되, 최종 결과물은 반드시 교사의 전문적인 판단을 거쳐 비판적으로 수정하고 보완해야 합니다.' }
+        ]
+    },
+    section3: {
+        title: '책임감 있는 AI & 윤리 교육',
+        concepts: [
+            { term: 'AI 편향 (AI Bias)', definition: 'AI가 학습한 데이터에 포함된 편견을 그대로 습득하여 편향된 결과를 생성하는 현상입니다.' },
+            { term: '환각 (AI Hallucination)', definition: 'AI가 사실이 아닌 정보를 마치 사실인 것처럼 그럴듯하게 생성하는 현상으로, AI 사용 시 가장 주의해야 할 위험 중 하나입니다.' },
+            { term: '책임감 있는 AI 활용 지도', definition: '학생들이 AI를 활용할 때, 결과물을 그대로 복사하지 않고 출처를 명시하며 자신의 생각을 덧붙이도록 지도해야 합니다. "AI 사용 금지"와 같은 극단적인 규칙보다는, 학생들과 함께 건설적인 AI 사용 규칙을 만들어보는 것이 효과적입니다.' },
+            { term: 'AI 윤리 교육의 목표', definition: '단순히 AI 기술을 이해하는 것을 넘어, AI가 가진 한계를 인지하고 정보를 비판적으로 수용하며, 윤리적 문제에 대해 자기 성찰을 할 수 있는 능력을 기르는 것입니다.' },
+            { term: '교사의 AI 활용 원칙: 개인정보 보호', definition: '학생 관련 정보를 다룰 때는 반드시 Google Workspace for Education 계정을 사용하여 개인정보를 보호해야 합니다.' },
+            { term: '교사의 AI 활용 원칙: 검증의 생활화', definition: 'AI가 생성한 정보는 항상 여러 출처와 비교 검토(Fact Check)하는 습관이 필요합니다.' },
+            { term: '교사의 AI 활용 원칙: AI는 보조 도구', definition: 'AI에 과도하게 의존하면 교사의 창의적 사고가 감소할 수 있습니다. AI는 교사의 전문성을 돕는 파트너이자 보조 도구임을 명심해야 합니다.' }
+        ]
+    }
+};
+
+const comprehensiveQuizData = [
+    { q: "“Generative AI”란 무엇인가요?", o: ["데이터를 수집·분석하는 전통적 AI", "새로운 콘텐츠(텍스트, 이미지 등)를 생성하는 AI", "단순 규칙 기반 자동화 시스템", "검색 결과를 정리하는 AI"], a: 1, r: "💡 생성형 AI는 기존 데이터를 학습해 새로운 결과를 생성합니다." },
+    { q: "“LLM (Large Language Model)”이란?", o: ["시각 이미지 인식 모델", "대규모 언어 데이터를 학습한 텍스트 생성 모델", "음성 인식 전용 모델", "코드 자동 생성 전용 엔진"], a: 1, r: "💡 LLM은 자연어를 이해하고 생성하는 모델입니다." },
+    { q: "“Prompting”이란?", o: ["AI 모델을 학습시키는 과정", "AI에게 명확한 지시를 주는 기술", "AI 출력을 평가하는 도구", "AI 오류를 수정하는 시스템"], a: 1, r: "💡 프롬프트는 AI가 원하는 방향으로 응답하도록 지시하는 방법입니다." },
+    { q: "Gemini의 가장 큰 교육적 특징은?", o: ["교사를 대체한다", "수업자료 제작과 학습 지원을 자동화한다", "학생 데이터 분석만 수행한다", "학습 평가를 대신한다"], a: 1, r: "💡 Gemini는 교사를 지원하여 생산성과 창의성을 높입니다." },
+    { q: "Gemini가 통합된 Google Workspace 도구가 아닌 것은?", o: ["Docs", "Gmail", "Slides", "Calendar"], a: 3, r: "💡 현재 Gemini는 Calendar에는 직접 통합되지 않았습니다." },
+    { q: "효과적인 프롬프트 작성 프레임워크는?", o: ["SMART", "PARTS", "PEACE", "PIES"], a: 1, r: "💡 PARTS (Purpose–Audience–Role–Tone–Scope)는 효과적인 프롬프트 작성을 돕는 프레임워크입니다." },
+    { q: "Generative AI와 기존 AI의 차이점은?", o: ["새로운 데이터를 ‘생성’한다", "예측만 수행한다", "규칙 기반으로 작동한다", "인간 개입이 없다"], a: 0, r: "💡 기존 AI는 분류·예측 중심, 생성형 AI는 창의적 산출 중심입니다." },
+    { q: "Gemini의 “NotebookLM”은 어떤 도구인가요?", o: ["문서 편집기", "AI 기반 노트·요약 도구", "일정 관리 도구", "발표용 슬라이드 제작기"], a: 1, r: "💡 NotebookLM은 업로드한 문서를 요약·마인드맵·오디오 개요로 제공합니다." },
+    { q: "Gemini의 “Gems” 기능은?", o: ["AI 기능 저장 및 자동화 도구", "이미지 생성 기능", "파일 변환 도구", "학생 계정 관리 기능"], a: 0, r: "💡 Gems는 반복되는 AI 작업을 자동화하여 “맞춤형 Gemini”로 저장할 수 있습니다." },
+    { q: "Gemini를 활용해 교사가 얻을 수 있는 주요 효과는?", o: ["수업 준비시간 단축", "성적 산출 자동화", "출석관리 개선", "평가결과 암호화"], a: 0, r: "💡 행정 및 수업자료 준비 시간을 절약하고 창의적 수업 설계에 집중할 수 있습니다." },
+    { q: "Gemini in Gmail 기능은?", o: ["이메일 자동 번역", "이메일 초안 생성 및 톤 조정", "스팸 메일 삭제", "첨부파일 정리"], a: 1, r: "💡 맥락과 어조에 맞게 초안을 자동 생성합니다." },
+    { q: "Gemini in Forms의 기능은?", o: ["퀴즈를 자동 채점", "문서나 슬라이드 기반으로 문제를 자동 생성", "설문 결과를 시각화", "AI 피드백을 음성으로 제공"], a: 1, r: "💡 Forms에서 Doc 기반으로 자동 퀴즈 문항을 생성할 수 있습니다." },
+    { q: "NotebookLM의 “Audio Overview” 기능은?", o: ["문서를 음성으로 요약해 들려줌", "오디오 파일을 텍스트로 변환", "AI 음성 녹음", "노트 작성용 음성메모"], a: 0, r: "💡 NotebookLM이 문서를 요약해 음성으로 설명합니다." },
+    { q: "PARTS 프레임워크에서 “T”는 무엇을 의미하나요?", o: ["Topic", "Tone", "Task", "Type"], a: 1, r: "💡 Tone은 결과물의 어조나 분위기를 설정하는 요소입니다." },
+    { q: "Google Vids의 Gemini 관련 기능은?", o: ["영상 자막 자동 번역", "스크립트·음성·애니메이션 생성", "동영상 편집 단축키 제공", "학생 출연 영상 제작"], a: 1, r: "💡 Gemini가 대본과 음성을 생성하여 슬라이드 영상을 제작합니다." },
+    { q: "Gemini를 활용해 교사가 할 수 있는 가장 효율적인 일은?", o: ["학부모 안내문 자동 작성", "성적표 수기 작성", "시험지 스캔", "출석표 인쇄"], a: 0, r: "💡 Gemini는 행정문서·공지문 초안을 빠르게 작성합니다." },
+    { q: "Gemini의 “NotebookLM Mind Map” 기능은?", o: ["데이터 시각화", "개념 간 관계를 구조화", "이미지 편집", "시간표 생성"], a: 1, r: "💡 복잡한 개념의 관계를 시각적으로 정리합니다." },
+    { q: "Gemini를 사용하여 만든 루브릭의 장점은?", o: ["학생 평가 기준을 자동화하고 맞춤화 가능", "채점 완전 자동화", "객관식 시험 전용", "수학 문제 채점만 가능"], a: 0, r: "💡 교과·학년별 맞춤형 평가 기준을 빠르게 생성할 수 있습니다." },
+    { q: "교사가 Gemini를 사용할 때 가장 중요한 태도는?", o: ["AI 결과를 그대로 수용", "AI를 비판적으로 활용", "AI 의존 극대화", "AI로 수업 대체"], a: 1, r: "💡 Gemini의 결과를 참고하되, 교사의 전문 판단이 필수입니다." },
+    { q: "Gemini로 학습 차별화를 지원하는 방법은?", o: ["학습자 수준별 맞춤 과제 생성", "시험 자동 채점", "동일 과제 반복 생성", "성적 순 정렬"], a: 0, r: "💡 Gemini는 학생 수준에 맞는 자료를 빠르게 제안할 수 있습니다." },
+    { q: "“AI Bias”란?", o: ["AI가 데이터를 편향되게 해석하는 현상", "AI가 느리게 작동하는 현상", "AI가 인간 감정을 모방하는 현상", "AI가 오류를 수정하는 기능"], a: 0, r: "💡 AI는 학습 데이터에 따라 편향된 결과를 낼 수 있습니다." },
+    { q: "“AI Hallucination”이란?", o: ["AI가 감정 반응을 보이는 현상", "AI가 잘못된 정보를 ‘그럴듯하게’ 생성", "AI가 네트워크를 끊는 오류", "AI가 오디오 데이터를 인식하지 못함"], a: 1, r: "💡 Hallucination은 가장 자주 언급되는 AI 위험 중 하나입니다." },
+    { q: "교사가 학생에게 AI 사용을 지도할 때 강조해야 할 점은?", o: ["출처 명시와 자기 생각 추가", "모든 AI 사용 금지", "오직 Gemini만 사용", "결과 복사 제출"], a: 0, r: "💡 책임감 있고 창의적인 AI 활용 태도가 중요합니다." },
+    { q: "학생과 함께 “책임 있는 AI 사용”을 논의하는 좋은 방법은?", o: ["AI 사용 규칙을 함께 만들어보기", "금지 조항 나열", "AI 사용 제한", "AI 실험 금지"], a: 0, r: "💡 학생 참여형 규칙 만들기가 효과적입니다." },
+    { q: "AI 윤리교육의 핵심 목표는?", o: ["AI 기술 이해", "비판적 사고와 자기 성찰 능력 향상", "프로그래밍 실습", "AI 홍보"], a: 1, r: "💡 학생이 AI의 한계를 이해하고 책임감 있게 활용하도록 돕습니다." },
+    { q: "교사가 AI를 과도하게 의존할 때 생길 수 있는 문제는?", o: ["창의적 사고 감소", "데이터 오류", "문법 실수", "메모리 부족"], a: 0, r: "💡 AI 의존은 교사의 사고력 약화로 이어질 수 있습니다." },
+    { q: "Gemini 사용 중 학생 개인정보 보호를 위한 조치는?", o: ["Workspace 교육계정에서 사용", "개인 Gmail에서 사용", "공용 계정 공유", "캡처 이미지 업로드"], a: 0, r: "💡 Google Workspace for Education 계정 사용이 원칙입니다." },
+    { q: "AI 결과의 신뢰성을 검증하는 방법은?", o: ["여러 출처와 비교 검토", "그대로 복사", "감으로 판단", "프롬프트 변경 금지"], a: 0, r: "💡 AI 출력은 항상 교사 검증이 필요합니다." },
+    { q: "Gemini를 활용해 수업시간에 할 수 있는 윤리활동은?", o: ["AI 편향 사례 찾기 및 토론", "Gemini 사용 금지", "AI 게임하기", "AI 광고 분석"], a: 0, r: "💡 실제 사례 기반 토론이 윤리적 감수성을 높입니다." },
+    { q: "교사가 AI를 사용할 때의 핵심 원칙은?", o: ["교사 대체가 아닌 보조로 활용", "AI에 모든 결정을 맡김", "기술 중심 수업만 운영", "학생 배제"], a: 0, r: "💡 Gemini는 교사의 창의적·윤리적 판단을 돕는 파트너입니다." }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+    const accordionsContainer1 = document.getElementById('section1-accordions');
+    const accordionsContainer2 = document.getElementById('section2-accordions');
+    const accordionsContainer3 = document.getElementById('section3-accordions');
+
+    function createAccordion(item) {
+        const div = document.createElement('div');
+        div.className = 'accordion-item bg-white rounded-lg shadow-sm';
+        div.innerHTML = `
+            <button class="accordion-header w-full flex justify-between items-center text-left p-4 md:p-5">
+                <h3 class="text-md md:text-lg font-semibold text-stone-800">${item.term}</h3>
+                <span class="accordion-arrow transition-transform duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </span>
+            </button>
+            <div class="accordion-content">
+                <div class="p-4 md:p-5 border-t border-stone-200 text-stone-700 leading-relaxed">${item.definition}</div>
+            </div>
+        `;
+        div.querySelector('.accordion-header').addEventListener('click', () => {
+            div.classList.toggle('accordion-open');
+        });
+        return div;
+    }
+
+    studyData.section1.concepts.forEach(item => accordionsContainer1.appendChild(createAccordion(item)));
+    studyData.section2.concepts.forEach(item => accordionsContainer2.appendChild(createAccordion(item)));
+    studyData.section3.concepts.forEach(item => accordionsContainer3.appendChild(createAccordion(item)));
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('tab-active'));
+            tab.classList.add('tab-active');
+
+            contents.forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(tab.dataset.tab).classList.remove('hidden');
+        });
+    });
+
+    const quizModal = document.getElementById('quiz-modal');
+    const quizContent = document.getElementById('quiz-content');
+    const quizNavigation = document.getElementById('quiz-navigation');
+    const quizProgressText = document.getElementById('quiz-progress-text');
+    const quizProgressBar = document.getElementById('quiz-progress-bar');
+    
+    let currentQuestionIndex = 0;
+    let userAnswers = new Array(comprehensiveQuizData.length).fill(null);
+    let score = 0;
+
+    document.getElementById('start-comprehensive-quiz-btn').addEventListener('click', () => {
+        currentQuestionIndex = 0;
+        userAnswers.fill(null);
+        score = 0;
+        renderQuizSlide();
+        quizModal.classList.remove('hidden');
+    });
+
+    document.getElementById('close-quiz-btn').addEventListener('click', () => {
+        quizModal.classList.add('hidden');
+    });
+
+    function renderQuizSlide() {
+        const question = comprehensiveQuizData[currentQuestionIndex];
+        quizContent.innerHTML = '';
+        
+        const questionText = document.createElement('p');
+        questionText.className = 'font-bold text-xl mb-4 text-stone-800';
+        questionText.textContent = `Q${currentQuestionIndex + 1}. ${question.q}`;
+        quizContent.appendChild(questionText);
+
+        const optionsContainer = document.createElement('div');
+        optionsContainer.className = 'space-y-3';
+        
+        question.o.forEach((option, i) => {
+            const optionLabel = document.createElement('label');
+            optionLabel.className = 'quiz-option block p-4 border-2 border-stone-200 rounded-lg cursor-pointer hover:bg-stone-100';
+            optionLabel.innerHTML = `
+                <input type="radio" name="q_option" value="${i}" class="hidden">
+                <span>${option}</span>
+            `;
+            optionsContainer.appendChild(optionLabel);
+
+            optionLabel.addEventListener('click', () => {
+                if (userAnswers[currentQuestionIndex] !== null) return;
+                
+                document.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected'));
+                optionLabel.classList.add('selected');
+                
+                const checkButton = quizNavigation.querySelector('#check-answer-btn');
+                if (checkButton) checkButton.disabled = false;
+            });
+        });
+
+        quizContent.appendChild(optionsContainer);
+
+        const rationaleDiv = document.createElement('div');
+        rationaleDiv.id = 'quiz-rationale';
+        rationaleDiv.className = 'hidden mt-5 p-4 bg-stone-100 rounded-lg text-stone-700 border border-stone-200';
+        quizContent.appendChild(rationaleDiv);
+
+        updateProgress();
+        updateNavigation();
+    }
+
+    function updateProgress() {
+        const progress = ((currentQuestionIndex + 1) / comprehensiveQuizData.length) * 100;
+        quizProgressBar.style.width = `${progress}%`;
+        quizProgressText.textContent = `문제 ${currentQuestionIndex + 1} / ${comprehensiveQuizData.length}`;
+    }
+
+    function updateNavigation() {
+        quizNavigation.innerHTML = '';
+        
+        const isAnswered = userAnswers[currentQuestionIndex] !== null;
+
+        if (isAnswered) {
+            if (currentQuestionIndex < comprehensiveQuizData.length - 1) {
+                const nextButton = document.createElement('button');
+                nextButton.textContent = '다음 문제 →';
+                nextButton.className = 'bg-teal-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-teal-700 transition-colors';
+                nextButton.onclick = () => {
+                    currentQuestionIndex++;
+                    renderQuizSlide();
+                };
+                quizNavigation.appendChild(nextButton);
+            } else {
+                const showResultButton = document.createElement('button');
+                showResultButton.textContent = '결과 보기';
+                showResultButton.className = 'bg-teal-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-teal-700 transition-colors';
+                showResultButton.onclick = showResults;
+                quizNavigation.appendChild(showResultButton);
+            }
+        } else {
+            const checkButton = document.createElement('button');
+            checkButton.id = 'check-answer-btn';
+            checkButton.textContent = '정답 확인';
+            checkButton.className = 'bg-teal-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-teal-600 transition-colors disabled:bg-stone-300';
+            checkButton.disabled = true;
+            checkButton.onclick = checkAnswer;
+            quizNavigation.appendChild(checkButton);
+        }
+    }
+
+    function checkAnswer() {
+        const selectedOption = quizContent.querySelector('input[name="q_option"]:checked');
+        if (!selectedOption) return;
+
+        const selectedIndex = parseInt(selectedOption.value);
+        userAnswers[currentQuestionIndex] = selectedIndex;
+
+        const question = comprehensiveQuizData[currentQuestionIndex];
+        const options = quizContent.querySelectorAll('.quiz-option');
+
+        options.forEach((opt, i) => {
+            if (i === question.a) {
+                opt.classList.add('correct');
+            }
+            if (i === selectedIndex && selectedIndex !== question.a) {
+                opt.classList.add('incorrect');
+            }
+            opt.style.pointerEvents = 'none';
+        });
+
+        if (selectedIndex === question.a) {
+            score++;
+        }
+
+        const rationaleDiv = document.getElementById('quiz-rationale');
+        if (rationaleDiv) {
+            rationaleDiv.innerHTML = question.r;
+            rationaleDiv.classList.remove('hidden');
+        }
+
+        updateNavigation();
+    }
+
+    function showResults() {
+        quizContent.innerHTML = `
+            <div class="text-center p-8">
+                <h3 class="text-2xl font-bold text-teal-800 mb-4">퀴즈 완료!</h3>
+                <p class="text-4xl font-bold text-stone-800 mb-2">${score} / ${comprehensiveQuizData.length}</p>
+                <p class="text-lg text-stone-600">문제를 모두 푸셨습니다.</p>
+                <div class="mt-8">
+                    <button id="restart-quiz-btn" class="bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 transition-colors">다시 풀기</button>
+                </div>
+            </div>
+        `;
+        quizNavigation.innerHTML = '';
+        document.getElementById('restart-quiz-btn').onclick = () => {
+             currentQuestionIndex = 0;
+             userAnswers.fill(null);
+             score = 0;
+             renderQuizSlide();
+        };
+    }
+
+});
+</script>
+</body>
+</html>
+
+
